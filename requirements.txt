@@ -1,0 +1,11 @@
+celery
+redis
+requests
+flower
+dotenv
+bs4
+sqlalchemy
+typing
+datetime
+pymysql
+cryptography
