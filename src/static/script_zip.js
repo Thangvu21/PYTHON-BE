@@ -29,11 +29,34 @@ form.addEventListener('submit', (e) => {
         }
         return path
     }).then((path) => {
+        console.log(path)
         const download_btn = document.createElement('a');
         download_btn.href = path
-        download_btn.textContent = 'Tải file zip'
-        download_btn.className = 'button btn-success'
-        download_btn.download = ''
+        download_btn.textContent = 'Tải file zip';
+        
+        download_btn.className = 'btn btn-success mt-2';
+        download_btn.download = '';
+        download_btn.id = 'download-zip-btn';
+        download_btn.style.display = 'inline-block';
+        download_btn.style.fontWeight = 'bold';
+        download_btn.style.fontSize = '1.1rem';
+        download_btn.style.marginTop = '10px';
+        download_btn.style.padding = '10px 24px';
+        download_btn.style.borderRadius = '6px';
+        download_btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+        download_btn.style.transition = 'background 0.2s';
+
+        download_btn.onmouseover = () => {
+            download_btn.style.background = '#218838';
+            download_btn.style.color = '#fff'
+        };
+        download_btn.onmouseout = () => {
+            download_btn.style.background = '';
+            download_btn.style.color = '';
+        };
+        
+        container.style.textAlign = 'center';
+
         container.appendChild(download_btn)
     })
 

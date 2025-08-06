@@ -43,7 +43,9 @@ class GetImageService():
         zip_path = shutil.make_archive(os.path.join(os.path.dirname(save_dir), zip_name), 'zip', save_dir)
         # xóa luôn thư mục chứa ảnh tiết kiệm bộ nhớ
         shutil.rmtree(save_dir)
-        return zip_path
+        # lúc nãy điền nhầm zip_path nên noskhoong tìm thấy:)) bây giờ tải được rồi
+        zip_filename = os.path.basename(zip_path)
+        return f"public/{zip_filename}"
 
 serviceImage = GetImageService()
 

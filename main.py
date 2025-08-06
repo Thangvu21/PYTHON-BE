@@ -13,6 +13,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import os
 
+templates = Jinja2Templates(directory="src/templates")
+image_services = ImageModel()
+get_image_services = GetImageService()
+
 app =  FastAPI(title="ChimichangApp")
 app.add_middleware(
     CORSMiddleware,
@@ -23,10 +27,7 @@ app.add_middleware(
 )
 app.mount("/static", StaticFiles(directory="src/static"), name="static")
 # mount là nối từ thư mục đó qua http và post
-app.mount("/public", StaticFiles(directory='public'), name='public')
-templates = Jinja2Templates(directory="src/templates")
-image_services = ImageModel()
-get_image_services = GetImageService()
+app.mount("/public", StaticFiles(directory="src/public"), name='public')
 
 class URL(BaseModel):
     url: str
@@ -93,8 +94,8 @@ async def image_for_time_ui(request: Request):
 async def down_load_zip_api(time_range: TimeRange):
     images_for_time = image_services.get_images_for_time(time_range.start_time, time_range.end_time)
     url_for_time = [image['url'] for image in images_for_time]
-    path_zip = get_image_services.download_and_zip_images(url_for_time, 'public', str(uuid4()))
-    return path_zip
+    path_zip = get_image_services.download_and_zip_images(url_for_time, 'src/public', str(uuid4()))
+    return f"http://localhost:8000/{path_zip}"
 
 # ui
 @app.get('/down_load_zip', response_class=HTMLResponse)
