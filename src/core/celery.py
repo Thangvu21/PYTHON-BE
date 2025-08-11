@@ -1,6 +1,7 @@
 from celery import Celery
 from src.config.conf import Configuration
 from src.tasks import crawl_image_tasks
+from src.tasks import zip_tasks
 from src.core.celeryconfig import schedule
 config = Configuration()
 # Cần sửa

@@ -3,32 +3,43 @@ from typing import List
 import os
 from urllib.parse import urlparse
 import shutil
+import aiofiles 
+import asyncio
+import aiohttp
+import logging
 
 class GetImageService():
     def __init__(self):
         pass
 
-    def downImage(self, url: str, save_path: str):
+    async def downImage(self, url: str, save_path: str):
         try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                with open(save_path, 'wb') as f:
-                    f.write(response.content)
-                print(f"Ảnh đã được ghi thành công: {url}", save_path)
-            else:
-                print(f"Ảnh đã được ghi thất bại Mã trạng thái: {response.status_code}")
+            # request này cũng là bất đồng bộ đổi request blocking
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+            # response = requests.get(url)
+                    if response.status == 200:
+                        async with aiofiles.open(save_path, 'wb') as f:
+                            content = await response.read()
+                            await f.write(content)
+                        print(f"Ảnh đã được ghi thành công: {url}", save_path)
+                    else:
+                        print(f"Ảnh đã được ghi thất bại Mã trạng thái: {response.status}")
 
         except Exception as e:
             print(f"Lỗi {e}")
 
-    def downListImages(self, list_url: List[str], save_dir: str):
+    async def downListImages(self, list_url: List[str], save_dir: str):
         os.makedirs(save_dir, exist_ok=True)
 
         try:
-            for idx, url in enumerate(list_url):
+            # Không dùng lặp từng cái nữa mà xử lý theo batch
+            tasks = []
+            for url in list_url:
                 save_path = self.build_path(save_dir, url)
-                self.downImage(url, save_path)
-            
+                # Mảng promise
+                tasks.append(self.downImage(url, save_path))
+            await asyncio.gather(*tasks)
         except Exception as e:
             print(f'Lỗi khi tải về nhiều ảnh: {e}')
     
@@ -37,12 +48,26 @@ class GetImageService():
         save_path = os.path.join(save_dir, filename)
         return save_path
     
-    def download_and_zip_images(self, list_url: List[str], save_dir: str, zip_name: str):
-        save_dir = os.path.join(save_dir, zip_name)
-        self.downListImages(list_url, save_dir)
-        zip_path = shutil.make_archive(os.path.join(os.path.dirname(save_dir), zip_name), 'zip', save_dir)
+    async def download_and_zip_images(self, list_url: List[str], save_dir: str, zip_name: str):
+        save_dir = os.path.abspath(os.path.join(save_dir, zip_name))
+        await self.downListImages(list_url, save_dir)
+        try:
+            zip_path = await asyncio.to_thread(
+                shutil.make_archive, 
+                os.path.join(os.path.dirname(save_dir), zip_name), 
+                'zip', 
+                save_dir
+            )
+            logging.info(f"zip_path: {zip_path}")
+        except Exception as e:
+            logging.error(f"Lỗi tạo file zip: {e}")
+        
         # xóa luôn thư mục chứa ảnh tiết kiệm bộ nhớ
-        shutil.rmtree(save_dir)
+        try:
+            await asyncio.to_thread(shutil.rmtree, save_dir)
+        except Exception as e:
+            logging.error(f"Lỗi xóa thư mục tạm: {e}")
+
         # lúc nãy điền nhầm zip_path nên noskhoong tìm thấy:)) bây giờ tải được rồi
         zip_filename = os.path.basename(zip_path)
         return f"public/{zip_filename}"

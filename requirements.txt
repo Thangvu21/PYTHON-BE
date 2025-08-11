@@ -9,3 +9,6 @@ typing
 datetime
 pymysql
 cryptography
+aiofiles
+aiohttp
+asyncio
