@@ -9,7 +9,7 @@ config = Configuration()
 celery = Celery(
     'PythonBE',
     broker= config.host_redis_not_docker,
-    backend= config.backend_redis_not_docker,
+    backend= f'db+{config.db_not_docker}',
     # include=[config.module_include]
 )
 celery.conf.beat_schedule = schedule

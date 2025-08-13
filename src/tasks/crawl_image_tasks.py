@@ -1,7 +1,7 @@
 from celery import shared_task
-from ..services.crawl_services import CrawlImageService
-from ..services.image_services import ImageModel, Image, List
-from ..services.get_images import GetImageService
+from src.services.crawl_services import CrawlImageService
+from src.services.image_services import ImageModel, Image, List
+from src.services.get_images import GetImageService
 import os
 
         

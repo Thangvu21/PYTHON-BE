@@ -29,7 +29,6 @@ async def down_load_zip(time_range: TimeRange):
 # Tạo endpoint cơ chế yêu cầu
 @router.post('/down_load_zip')
 async def down_load_zip_api(time_range: TimeRange):
-    images_for_time = image_services.get_images_for_time(time_range.start_time, time_range.end_time)
     images_for_time = await run_in_threadpool( 
         image_services.get_images_for_time,
         time_range.start_time, 

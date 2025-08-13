@@ -2,6 +2,7 @@ from fastapi import FastAPI,Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from src.tasks.crawl_image_tasks import implement_crawl
+import asyncio
 from src.tasks.zip_tasks import zipFolder
 from src.core.celery import celery
 from fastapi.staticfiles import StaticFiles
@@ -28,7 +29,9 @@ app.include_router(routers, prefix="/api")
 #ui
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    await implement_crawl.delay('https://www.pinterest.com/ideas/')
+    # Thử đợi 1 s để nó khởi tạo celery xong xem sao
+    await asyncio.sleep(1)
+    implement_crawl.delay('https://www.pinterest.com/ideas/')
     return templates.TemplateResponse("index.html", {"request": request, "message": "Hello from FastAPI!"})
 
 @app.get("/images", response_class=HTMLResponse)
