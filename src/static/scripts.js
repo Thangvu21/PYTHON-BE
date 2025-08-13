@@ -3,7 +3,7 @@ const image_block = document.querySelector('.container');
 
 let page_hientai = 0; // hoặc lấy từ input, query string, v.v.
 const page_size = 20;
-const url = `http://localhost:8000/api/l_images?page=${page_hientai}&page_size=${page_size}`;
+const url = `http://localhost:8000/api/image/l_images?page=${page_hientai}&page_size=${page_size}`;
 
 fetch(url, {
     method: 'GET',
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById("current-page").innerHTML = `Trang hiện tại: ${page}<br>`;
 
             // Gọi lại API với page mới
-            fetch(`http://localhost:8000/api/l_images?page=${page}&page_size=${page_size}`)
+            fetch(`http://localhost:8000/api/image/l_images?page=${page}&page_size=${page_size}`)
                 .then(response => response.json())
                 .then(images => {
                     image_block.innerHTML = '';

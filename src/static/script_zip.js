@@ -7,7 +7,7 @@ form.addEventListener('submit', (e) => {
     const start_time = this.start_time.value
     const end_time = this.end_time.value
 
-    fetch('http://127.0.0.1:8000/api/down_load_zip/', {
+    fetch('http://127.0.0.1:8000/api/down/down_load_zip', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ form.addEventListener('submit', (e) => {
 
         // Long polling function
         function pollStatus() {
-            fetch(`http://127.0.0.1:8000/api/task_status?task_id=${task_id}`, {
+            fetch(`http://127.0.0.1:8000/api/down/task_status?task_id=${task_id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

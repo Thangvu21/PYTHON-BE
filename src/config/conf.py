@@ -4,10 +4,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 host_redis = os.environ.get('host_redis')
-broker_url = os.environ.get('broker_url')
-db_url = os.environ.get('DB_URL_DOCKER')
-db_not_docker = os.environ.get('DB_URL_NOT_DOCKER')
+backend_redis = os.environ.get('backend_redis')
+
 host_redis_not_docker = os.environ.get('host_redis_not_docker')
+backend_redis_not_docker = os.environ.get('backend_redis_not_docker')
+
+db = os.environ.get('DB_URL_DOCKER')
+db_not_docker = os.environ.get('DB_URL_NOT_DOCKER')
+
 key_pexel = os.environ.get('KEY_PEXELS')
 
 # print(host_redis)
@@ -15,10 +19,15 @@ key_pexel = os.environ.get('KEY_PEXELS')
 class Configuration():
     def __init__(self):
         self.host_redis = host_redis
-        self.broker_url = broker_url
-        self.db_url = db_url
-        self.db_not_docker = db_not_docker
+        self.backend_redis = backend_redis
+
         self.host_redis_not_docker = host_redis_not_docker
+        self.backend_redis_not_docker = backend_redis_not_docker
+
+
+        self.db = db
+        self.db_not_docker = db_not_docker
+        
         self.key_pexels = key_pexel
         
         

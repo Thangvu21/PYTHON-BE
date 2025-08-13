@@ -5,12 +5,11 @@ from src.tasks import zip_tasks
 from src.core.celeryconfig import schedule
 config = Configuration()
 # Cần sửa
-host_redis = config.host_redis_not_docker
 
 celery = Celery(
     'PythonBE',
-    broker= host_redis,
-    backend= host_redis,
+    broker= config.host_redis_not_docker,
+    backend= config.backend_redis_not_docker,
     # include=[config.module_include]
 )
 celery.conf.beat_schedule = schedule

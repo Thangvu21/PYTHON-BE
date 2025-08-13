@@ -6,7 +6,7 @@ form.addEventListener("submit", function (e) {
     const start_time = this.start_time.value
     const end_time = this.end_time.value
 
-    fetch(`http://127.0.0.1:8000/api/image_for_time/`, {
+    fetch(`http://127.0.0.1:8000/api/image/image_for_time/`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
