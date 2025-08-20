@@ -3,13 +3,14 @@ from src.services.crawl_services import CrawlImageService
 from src.services.image_services import ImageModel, Image, List
 from src.services.get_images import GetImageService
 import os
-
+from src.services.get_images import get_image_services
+from src.services.image_services import image_services
         
 # crawl trực t
 @shared_task(name="crawl")
 def implement_crawl(url):
     craw_service = CrawlImageService(url)
-    imageModel = ImageModel()
+    imageModel = image_services
     list_url = craw_service.crawl()
     print(f"list_url: {list_url}")
     list_url_image: List[Image] = [
@@ -19,9 +20,6 @@ def implement_crawl(url):
     return imageModel.add_images(list_url_image)
     
 # dấu chấm để import 1 cái tương đối
-
-
-get_image_services = GetImageService()
 
 @shared_task(name="zip")
 def down_zip_image(list_url: List[str], save_dir, zip_name):

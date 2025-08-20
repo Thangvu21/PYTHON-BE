@@ -4,10 +4,12 @@ from fastapi import APIRouter
 from src.tasks.zip_tasks import zipFolder
 from uuid import uuid4
 from src.services.image_services import ImageModel
-from src.services.get_images import GetImageService
-
-image_services = ImageModel()
-get_image_services = GetImageService()
+from src.services.get_images import get_image_services
+from src.services.image_services import image_services
+from src.tasks.chord_task import pipeline_v2
+from src.tasks.workflow_task import pipeline_v3
+from celery.result import AsyncResult
+import os
 
 router = APIRouter(prefix='/down', tags=['down_image'])
 
@@ -22,8 +24,6 @@ async def down_load_zip(time_range: TimeRange):
     url_for_time = [image['url'] for image in images_for_time]
     path_zip = await get_image_services.download_and_zip_images(url_for_time, 'src/public', str(uuid4()))
     return f"http://localhost:8000/{path_zip}"
-
-
 
 #download ảnh 
 # Tạo endpoint cơ chế yêu cầu
@@ -49,6 +49,47 @@ async def get_task_status(task_id: str):
             "status": "success",
             "download_url": f"http://localhost:8000/{task.result}"
         }
+    elif task.state == 'FAILURE':
+        return {"status": "failure", "error": str(task.info)}
+    else:
+        return {"status": task.state}
+
+@router.post('/chord_image')
+async def chord_down_api(time_range: TimeRange):
+    task = pipeline_v2.delay(time_range.start_time, time_range.end_time, 'src/public', str(uuid4()))
+    return {"task_id": task.id}
+
+@router.get('/chord_status/{task_id}')
+async def chord_status(task_id: str):
+    task = AsyncResult(task_id)
+    if task.state == "PENDING":
+        return {"status": "pending"}
+    elif task.state == 'SUCCESS':
+        result_task = task.get()
+        print(f"result_task: {result_task}")
+    
+        return {"status": "success", "download_url": f"http://localhost:8000/public/{result_task}.zip"}
+    elif task.state == 'FAILURE':
+        return {"status": "failure", "error": str(task.info)}
+    else:
+        return {"status": task.state}
+    
+@router.post('/chord_image_gevent')
+async def chord_down_api(time_range: TimeRange):
+    task = pipeline_v3.delay(time_range.start_time.isoformat(), time_range.end_time.isoformat(), 'src/public')
+    return {"task_id": task.id}
+
+@router.get('/chord_status_gevent/{task_id}')
+async def chord_status(task_id: str):
+    task = AsyncResult(task_id)
+    if task.state == "PENDING":
+        return {"status": "pending"}
+    elif task.state == 'SUCCESS':
+        result_task = task.get()
+        print(f"result_task: {result_task}")
+        zip_filename = os.path.basename(result_task)
+    
+        return {"status": "success", "download_url": f"http://localhost:8000/public/{zip_filename}"}
     elif task.state == 'FAILURE':
         return {"status": "failure", "error": str(task.info)}
     else:

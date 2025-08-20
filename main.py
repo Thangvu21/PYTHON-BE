@@ -3,8 +3,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from src.tasks.crawl_image_tasks import implement_crawl
 import asyncio
-from src.tasks.zip_tasks import zipFolder
 from src.core.celery import celery
+from src.services.get_image_service_sync import getImageSync
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool

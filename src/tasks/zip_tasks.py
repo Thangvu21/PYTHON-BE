@@ -1,10 +1,9 @@
 from celery import shared_task
 from typing import List
-from ..services.get_images import GetImageService
 import asyncio
 import os
 from celery.utils.log import get_task_logger
-get_image_services = GetImageService()
+from src.services.get_images import get_image_services
 logger = get_task_logger(__name__)
 
 

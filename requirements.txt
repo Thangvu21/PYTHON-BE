@@ -12,3 +12,7 @@ cryptography
 aiofiles
 aiohttp
 asyncio
+pydantic
+gevent
+greenletio
+asgiref

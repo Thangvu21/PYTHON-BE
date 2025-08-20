@@ -72,7 +72,7 @@ class GetImageService():
         zip_filename = os.path.basename(zip_path)
         return f"public/{zip_filename}"
 
-serviceImage = GetImageService()
+get_image_services = GetImageService()
 
 url = ['https://kenh14cdn.com/zoom/220_289/203336854389633024/2025/7/31/mingahaman3464186873596599076s2025-7-31-1338162-story-1753943917179628354607-1753945493691-17539454938822117163387-0-76-1800-1426-crop-1753945537782723595179.jpg'
 ,

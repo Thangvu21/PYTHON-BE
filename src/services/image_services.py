@@ -1,7 +1,7 @@
 from typing import List
-from ..db.db import engine
-from ..db.model import Image
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from src.db.db import engine
+from src.db.model import Image
+from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from sqlalchemy import and_
 
@@ -140,21 +140,19 @@ class ImageModel():
                 image_objects = []
                 images = query.all()
                 for image in images:
-                    image_objects.append(
-                        {
+                    obj: dict = {
                             "id": image.id,
                             "url": image.url,
                             "time_saved": image.time_saved
                         }
+                    image_objects.append(
+                        obj
                     )
                 return image_objects         
             except Exception as e:
                 return {"status": f"Error khi tìm tất cả ảnh theo thời gian: {e}"}
 
-
-        
-
-
+image_services = ImageModel()
 
     
 
