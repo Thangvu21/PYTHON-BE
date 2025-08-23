@@ -1,16 +1,13 @@
-from celery import shared_task, chord, chain, chunks, group
+from celery import shared_task, chord, group
 from datetime import datetime
 from src.services.get_images import get_image_services
 from src.services.image_services import image_services
 import logging
 import os
 import shutil
-from src.models.TimeRange import TimeRange
 from typing import List, Tuple
 from celery.result import GroupResult
-from greenletio import async_
-import asyncio
-import functools
+import asyncio_gevent, asyncio
 from asgiref.sync import async_to_sync
 
 # nhận vào 1 batch tuple url dir 
@@ -32,7 +29,27 @@ def create_list_image(self, url_save_path_list: List[Tuple[str, str]]):
         # result = async_to_sync(get_image_services.downListImages)(url_list, save_path)
         # Vì thằng chord nó chỉ quản lý việc evevt driven rồi nên việc quản lý bất đồng bộ cho trong task thì không được
         # viết chord khác
-        result = async_(get_image_services.downListImages(url_list, save_path))
+
+        # You cannot use AsyncToSync in the same thread as an async event loop - just await the async function directly.
+        # result = async_to_sync(
+        #     get_image_services.downListImages)(url_list, save_path)
+
+        # result = async_to_sync(get_image_services.downListImages)(url_list, save_path)
+        os.makedirs(save_path, exist_ok=True)
+
+        try:
+            # Không dùng lặp từng cái nữa mà xử lý theo batch
+            
+            # return exceptions sẽ dừng lại ngay lập tức khi raise exception
+            # Tất cả các task con đều được chạy đến cùng, dù có task nào đó bị lỗi.
+            loop = asyncio.get_event_loop()
+            group = asyncio.gather(*[get_image_services.downImage(save_path=save_path, url=url) for url in url_list], 
+                                   return_exceptions=True)
+            result = loop.run_until_complete(group)
+            loop.close()
+        except Exception as e:
+            print(f'Lỗi khi tải về nhiều ảnh: {e}')
+
 
         return f"done:{result}"
     except Exception as e:
@@ -40,7 +57,7 @@ def create_list_image(self, url_save_path_list: List[Tuple[str, str]]):
 
 #Tạo zip và xóa folder ảnh
 @shared_task(name="zip_v2", bind = True)
-def create_folder_zip(self, save_path: str):
+def create_folder_zip(self, groups, save_path: str):
 
     temp_dir = os.path.abspath(save_path)
     try:
@@ -68,10 +85,6 @@ def create_folder_zip(self, save_path: str):
         logging.error(f"Task ID {self.request.id}: Lỗi tạo file zip cho thư mục '{temp_dir}': {e}", exc_info=True)
 
     # Lỗi trả về trong khối đầu tiên không trả veed đúng giá trị nên nó trả về tuple ảo 
-    
-
-batch_size = 10
-
 
 @shared_task(name="check-process", bind = True)
 def process(self, group_id, save_path: str):
@@ -119,18 +132,19 @@ def pipeline_v2(self, start_time: datetime, end_time: datetime, save_dir: str, z
 
     url_save_path_list = [(url['url'], save_path) for url in urls]
 
+    batch_size = 30
     tasks = []
 
     for i in range(0, len(urls), batch_size):
         chunk = url_save_path_list[i: i + batch_size]
-        tasks.append(create_list_image.s(chunk))
+        res = create_list_image.s(chunk)
+        tasks.append(res)
 
 
-    # 1 nhóm các công việc song song
-    header = group(tasks) 
-    group_result = chord(header)(create_folder_zip.s(save_path))
+    # Chờ tất cả task con hoàn thành (có thể dùng AsyncResult)
+    header = group(tasks)
 
-    # 2 Theo luồng 
-    # THiếu get dẫn đến kết quả lấy ra như jj thêm get vào lấy result chuẩn vv
-
-    return group_result
+    # Sau khi tất cả task con xong, tạo zip
+    pipe = chord(header=header)(create_folder_zip.s(save_path))
+    final_result = pipe.get()  
+    return final_result

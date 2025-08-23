@@ -39,7 +39,9 @@ class GetImageService():
                 save_path = self.build_path(save_dir, url)
                 # Mảng promise
                 tasks.append(self.downImage(url, save_path))
-            await asyncio.gather(*tasks)
+            # return exceptions sẽ dừng lại ngay lập tức khi raise exception
+            # Tất cả các task con đều được chạy đến cùng, dù có task nào đó bị lỗi.
+            await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as e:
             print(f'Lỗi khi tải về nhiều ảnh: {e}')
     

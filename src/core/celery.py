@@ -2,19 +2,22 @@
 # import gevent.monkey
 # gevent.monkey.patch_all()
 from celery import Celery
-from src.config.conf import Configuration
 from src.tasks import crawl_image_tasks
 from src.tasks import zip_tasks
 from src.tasks import chord_task
 from src.tasks import workflow_task
 from src.core.celeryconfig import schedule
-config = Configuration()
+from src.config.conf import config_server
 # Cần sửa
+
+import asyncio_gevent, asyncio
+
+asyncio.set_event_loop_policy(asyncio_gevent.EventLoopPolicy())
 
 celery = Celery(
     'PythonBE',
-    broker= config.host_redis_not_docker,
-    backend= f'db+{config.db_not_docker}',
+    broker= config_server.host_redis_not_docker,
+    backend= f'db+{config_server.db_not_docker}',
     # include=[config.module_include]
 )
 celery.conf.beat_schedule = schedule

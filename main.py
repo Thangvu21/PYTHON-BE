@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
 from src.api.v1.routes import routers
 from src.api.v1.endpoint.Down import image_services
+from src.config.broker import r
+from src.config.conf import config_server
 
 templates = Jinja2Templates(directory="src/templates")
 

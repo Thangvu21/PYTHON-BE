@@ -33,6 +33,7 @@ class GetImageSync():
         os.makedirs(save_path, exist_ok=True)
         # Dùng thread thật
         max_workers = min(4, len(list_url))
+        # ProcessPollExecutor để làm CPU bound
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(self.downImage, url, save_path) for url in list_url]
             for f in futures:

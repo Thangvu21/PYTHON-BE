@@ -30,6 +30,9 @@
             /* Số cột bạn muốn */
             column-gap: 16px;
             margin-top: 20px;
+
+            justify-content: center;
+            align-items: center;
         }
 
         ul {
@@ -89,9 +92,12 @@
 
         .image-process-container {
             margin-top: 20px;
+            margin-bottom: 20px;
             display: flex;
             flex-direction: column;
             flex: 1;
+            align-items: center;
+            justify-content: center;
         }
 
         @media (max-width: 1200px) {
@@ -121,7 +127,7 @@
 
 <body>
     <div>
-        <h1>Image For Time</h1>
+        <h1>Image For ZIP</h1>
         <div id="current-page"></div>
         <form id="time-form">
             <label for="start_time">Start Time:</label>
@@ -136,25 +142,8 @@
 
             <div id="image-process-container">
                 <div class="progress">
-                    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0"
-                        aria-valuemax="100">
-                    </div>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0"
-                        aria-valuemax="100"></div>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                        aria-valuemax="100"></div>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0"
-                        aria-valuemax="100"></div>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="100"
-                        aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="25"
+                        aria-valuemin="0" aria-valuemax="100">0</div>
                 </div>
             </div>
         </div>

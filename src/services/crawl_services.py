@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-from ..config.conf import Configuration
+from src.config.conf import config_server
 
 class CrawlImageService():
     def __init__(self, url):
@@ -15,7 +15,7 @@ class CrawlImageService():
                     'per_page': 10
                 },
                 headers={
-                    "Authorization": Configuration().key_pexels  
+                    "Authorization": config_server.key_pexels  
                 })
             # kiểm tra trạng thái 403/500
             page.raise_for_status()

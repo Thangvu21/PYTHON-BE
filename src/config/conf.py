@@ -14,6 +14,9 @@ db_not_docker = os.environ.get('DB_URL_NOT_DOCKER')
 
 key_pexel = os.environ.get('KEY_PEXELS')
 
+host_local_redis = os.environ.get('host_local_redis')
+host_local_redis_docker = os.environ.get('host_local_redis_docker')
+
 # print(host_redis)
 
 class Configuration():
@@ -29,5 +32,9 @@ class Configuration():
         self.db_not_docker = db_not_docker
         
         self.key_pexels = key_pexel
+
+        self.host_local_redis = host_local_redis
+        self.host_local_redis_docker = host_local_redis_docker
+
         
-        
+config_server = Configuration()  

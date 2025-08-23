@@ -8,24 +8,24 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--requirepass", "123456"]
-  celery_worker:
-    build: .
-    env_file:
-      - .env
-    command: celery -A src.core.celery:celery worker --loglevel=info --pool=gevent --concurrency=200
-    depends_on:
-      - redis
-    volumes:
-      - ./src/public:/PythonBE/src/public   # <--- Thêm dòng này
-  flower:
-    build: .
-    env_file:
-      - .env
-    ports:
-      - "5555:5555"
-    command: celery -A src.core.celery:celery flower --port=5555
-    depends_on:
-      - redis
+  # celery_worker:
+  #   build: .
+  #   env_file:
+  #     - .env
+  #   command: celery -A src.core.celery:celery worker --loglevel=info --pool=gevent --concurrency=100
+  #   depends_on:
+  #     - redis
+  #   volumes:
+  #     - ./src/public:/PythonBE/src/public   # <--- Thêm dòng này
+  # flower:
+  #   build: .
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "5555:5555"
+  #   command: celery -A src.core.celery:celery flower --port=5555
+  #   depends_on:
+  #     - redis
 
 
 volumes:

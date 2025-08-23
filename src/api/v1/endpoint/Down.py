@@ -10,6 +10,7 @@ from src.tasks.chord_task import pipeline_v2
 from src.tasks.workflow_task import pipeline_v3
 from celery.result import AsyncResult
 import os
+from src.config.broker import r
 
 router = APIRouter(prefix='/down', tags=['down_image'])
 
@@ -67,8 +68,9 @@ async def chord_status(task_id: str):
     elif task.state == 'SUCCESS':
         result_task = task.get()
         print(f"result_task: {result_task}")
+        zip_filename = os.path.basename(result_task)
     
-        return {"status": "success", "download_url": f"http://localhost:8000/public/{result_task}.zip"}
+        return {"status": "success", "download_url": f"http://localhost:8000/public/{zip_filename}"}
     elif task.state == 'FAILURE':
         return {"status": "failure", "error": str(task.info)}
     else:
@@ -83,13 +85,17 @@ async def chord_down_api(time_range: TimeRange):
 async def chord_status(task_id: str):
     task = AsyncResult(task_id)
     if task.state == "PENDING":
-        return {"status": "pending"}
+        done = float(r.hget(f"progress: {task_id}", "done") or 0)
+        total = float(r.hget(f"progress: {task_id}", "total") or 1)
+        progress = done / total * 100
+        return {"done": done, "total": total, "progress": progress, "status": "PENDING"}
+
     elif task.state == 'SUCCESS':
         result_task = task.get()
         print(f"result_task: {result_task}")
         zip_filename = os.path.basename(result_task)
     
-        return {"status": "success", "download_url": f"http://localhost:8000/public/{zip_filename}"}
+        return {"status": "SUCCESS", "download_url": f"http://localhost:8000/public/{zip_filename}"}
     elif task.state == 'FAILURE':
         return {"status": "failure", "error": str(task.info)}
     else:

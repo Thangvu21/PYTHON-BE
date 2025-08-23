@@ -7,10 +7,11 @@ import logging
 import os
 import shutil
 from typing import List, Tuple
+from src.config.broker import r
 
 # nhận vào 1 batch tuple url dir 
 @shared_task(name="create_list_image_v3", bind=True)
-def create_list_image(self, url_save_path_list: List[Tuple[str, str]]):
+def create_list_image(self, url_save_path_list: List[Tuple[str, str]], parent_id: str):
     url_list = [url[0] for url in url_save_path_list]
     if not url_save_path_list:
         return
@@ -28,6 +29,7 @@ def create_list_image(self, url_save_path_list: List[Tuple[str, str]]):
         # Vì thằng chord nó chỉ quản lý việc evevt driven rồi nên việc quản lý bất đồng bộ cho trong task thì không được
         # viết chord khác
         result = getImageSync.downListImage(url_list, save_path)
+        r.hincrby(f"progress: {parent_id}", "done", 1)
 
         return f"done:{result}"
     except Exception as e:
@@ -35,7 +37,7 @@ def create_list_image(self, url_save_path_list: List[Tuple[str, str]]):
 
 #Tạo zip và xóa folder ảnh
 @shared_task(name="zip_v3", bind = True)
-def create_folder_zip(self, result, save_path: str):
+def create_folder_zip(self, result, save_path: str, parent_id: str):
 
     temp_dir = os.path.abspath(save_path)
     try:
@@ -57,6 +59,9 @@ def create_folder_zip(self, result, save_path: str):
         except Exception as e:
             logging.error(f"Lỗi xóa thư mục tạm: {e}")
             logging.error(f"Task ID {self.request.id}: Lỗi khi xóa thư mục tạm '{temp_dir}': {e}", exc_info=True)
+        
+        r.hincrby(f"progress: {parent_id}", "done", 1)
+
         return zip_path
     except Exception as e:
         logging.error(f"Task ID {self.request.id}: Lỗi tạo file zip cho thư mục '{temp_dir}': {e}", exc_info=True)
@@ -78,6 +83,11 @@ def pipeline_v3(self, start_time: datetime, end_time: datetime, save_dir: str):
     try:
         urls = image_services.get_images_for_time(start_time, end_time)
         # logging.info(f" data lấy về : {urls}")
+
+        total = (len(urls) / batch_size) + 2
+        logging.info(f"total: task = {total}")
+        r.hset(f"progress: {self.request.id}", "total", str(total))
+
     except Exception as e:
         logging.error(f"Task ID {self.request.id}: Lỗi khi truy vấn DB: {e}", exc_info=True)
 
@@ -86,18 +96,21 @@ def pipeline_v3(self, start_time: datetime, end_time: datetime, save_dir: str):
         return None
 
     url_save_path_list = [(url['url'], save_path) for url in urls]
+    
 
     tasks = []
 
     for i in range(0, len(urls), batch_size):
         chunk = url_save_path_list[i: i + batch_size]
-        tasks.append(create_list_image.s(chunk))
+        tasks.append(create_list_image.s(chunk, self.request.id))
 
+    
 
     # 1 nhóm các công việc song song
     header = group(tasks) 
-    group_result = chord(header)(create_folder_zip.s(save_path))
+    group_result = chord(header)(create_folder_zip.s(save_path, self.request.id))
 
     # Chờ và lấy kết quả cuối (zip_path)
     final_result = group_result.get()  
+    
     return final_result

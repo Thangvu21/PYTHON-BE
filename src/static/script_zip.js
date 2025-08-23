@@ -7,7 +7,7 @@ form.addEventListener('submit', (e) => {
     const start_time = this.start_time.value
     const end_time = this.end_time.value
 
-    fetch('http://127.0.0.1:8000/api/down/down_load_zip', {
+    fetch('http://127.0.0.1:8000/api/down/chord_image_gevent', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -25,12 +25,12 @@ form.addEventListener('submit', (e) => {
     }).then((data) => {
         const task_id = data.task_id;
         const zip_block = document.createElement('p');
-        zip_block.textContent = "Đang tạo file zip, vui lòng chờ...";
-        container.appendChild(zip_block);
+        // zip_block.textContent = "Đang tạo file zip, vui lòng chờ...";
+        // container.appendChild(zip_block);
 
         // Long polling function
         function pollStatus() {
-            fetch(`http://127.0.0.1:8000/api/down/task_status?task_id=${task_id}`, {
+            fetch(`http://127.0.0.1:8000/api/down/chord_status_gevent/${task_id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -38,10 +38,22 @@ form.addEventListener('submit', (e) => {
                 }
             }).then(response => response.json())
                 .then(statusData => {
-                    if (statusData.status === "pending") {
-                        zip_block.textContent = "Đang tạo file zip, vui lòng chờ...";
-                        setTimeout(pollStatus, 1000); // Gọi lại sau 2s
-                    } else if (statusData.status === "success") {
+                    if (statusData.status === "PENDING") {
+
+                        // Vẽ này
+                        progress = document.querySelector('.progress-bar')
+                        if (progress && statusData.progress !== undefined) {
+                            const percent = Math.round(statusData.progress);
+                            progress.style.width = percent + "%";
+                            progress.textContent = percent + "%";
+                        }
+                        setTimeout(pollStatus, 200);
+
+
+                    } else if (statusData.status === "SUCCESS") {
+
+                        progress.style.width = 100 + "%";
+                        progress.textContent = 100 + "%";
                         zip_block.textContent = "Tạo file zip thành công!";
                         const download_btn = document.createElement('a');
                         download_btn.href = statusData.download_url;
