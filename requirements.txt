@@ -16,3 +16,4 @@ pydantic
 gevent
 greenletio
 asgiref
+asyncio_gevent

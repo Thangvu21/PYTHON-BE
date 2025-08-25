@@ -54,8 +54,11 @@ async def postUrl(request: Request, page: int = 0, page_size: int = 20):
         "images": images,
         "page": page,
         "page_size": page_size,
+        "number_pages": number_pages,
+        "current_page": page,
         "number_pages": number_pages
     })
+
     
 @app.get('/image_for_time', response_class=HTMLResponse)
 def image_for_time_ui(request: Request):

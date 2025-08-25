@@ -7,6 +7,14 @@ form.addEventListener('submit', (e) => {
     const start_time = this.start_time.value
     const end_time = this.end_time.value
 
+    let zip_block = document.getElementById('zip-block');
+    if (!zip_block) {
+        zip_block = document.createElement('p');
+        zip_block.id = 'zip-block';
+        container.appendChild(zip_block);
+    }
+    zip_block.textContent = "Chúng tôi đang xử lý, vui lòng chờ...";
+
     fetch('http://127.0.0.1:8000/api/down/chord_image_gevent', {
         method: 'POST',
         headers: {
@@ -39,7 +47,8 @@ form.addEventListener('submit', (e) => {
             }).then(response => response.json())
                 .then(statusData => {
                     if (statusData.status === "PENDING") {
-
+                        let zip_block = document.getElementById('zip-block');
+                        zip_block.textContent = "Chúng tôi đang xử lý, vui lòng chờ...";
                         // Vẽ này
                         progress = document.querySelector('.progress-bar')
                         if (progress && statusData.progress !== undefined) {
@@ -47,14 +56,14 @@ form.addEventListener('submit', (e) => {
                             progress.style.width = percent + "%";
                             progress.textContent = percent + "%";
                         }
-                        setTimeout(pollStatus, 200);
+                        setTimeout(pollStatus, 1000);
 
 
                     } else if (statusData.status === "SUCCESS") {
-
+                        let zip_block = document.getElementById('zip-block');
+                        zip_block.textContent = "Tạo file zip thành công!";
                         progress.style.width = 100 + "%";
                         progress.textContent = 100 + "%";
-                        zip_block.textContent = "Tạo file zip thành công!";
                         const download_btn = document.createElement('a');
                         download_btn.href = statusData.download_url;
                         download_btn.textContent = 'Tải file zip';
