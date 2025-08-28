@@ -15,7 +15,7 @@ form.addEventListener('submit', (e) => {
     }
     zip_block.textContent = "Chúng tôi đang xử lý, vui lòng chờ...";
 
-    fetch('http://127.0.0.1:8000/api/down/chord_image_gevent', {
+    fetch(`${window.location.origin}/api/down/chord_image_gevent`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ form.addEventListener('submit', (e) => {
 
         // Long polling function
         function pollStatus() {
-            fetch(`http://127.0.0.1:8000/api/down/chord_status_gevent/${task_id}`, {
+            fetch(`${window.location.origin}/api/down/chord_status_gevent/${task_id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

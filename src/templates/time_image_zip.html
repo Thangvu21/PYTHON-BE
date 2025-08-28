@@ -382,7 +382,7 @@
             progressBar.classList.add('progress-bar-animated'); // Thêm lại hiệu ứng animation
             downloadBtn.classList.add('d-none'); // Ẩn nút download cũ đi
 
-            fetch('http://127.0.0.1:8000/api/down/chord_image_gevent', {
+            fetch(`${window.location.origin}/api/down/chord_image_gevent`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -416,7 +416,7 @@
         
         // NOTE: Hàm Polling để lấy trạng thái tác vụ
         function pollStatus(taskId) {
-            fetch(`http://127.0.0.1:8000/api/down/chord_status_gevent/${taskId}`)
+            fetch(`${window.location.origin}/api/down/chord_status_gevent/${taskId}`)
                 .then(response => response.json())
                 .then(statusData => {
                     switch (statusData.status) {

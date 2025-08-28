@@ -26,7 +26,32 @@ services:
     command: celery -A src.core.celery:celery flower --port=5555
     depends_on:
       - redis
+  db:
+    image: postgres:15
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: image_links
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  app:
+    build: .
+    env_file:
+      - .env
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./src/public:/PythonBE/src/public
+
 
 
 volumes:
   redis_data:
+  db_data:

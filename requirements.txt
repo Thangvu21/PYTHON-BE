@@ -17,3 +17,7 @@ gevent
 greenletio
 asgiref
 asyncio_gevent
+psycopg2-binary
+uvicorn[standard]
+fastapi
+jinja2

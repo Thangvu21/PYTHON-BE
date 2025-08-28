@@ -3,12 +3,13 @@ FROM python:3.11-slim
 WORKDIR /PythonBE
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./src /PythonBE/src  
+COPY ./src /PythonBE/src
+COPY .env .
+COPY main.py .
 
-COPY .env . 
-# Để tận dụng tối đa tính bất đồng bộ, hãy chạy Celery worker với event loop (ví dụ: gevent hoặc eventlet). Celery worker mặc định chạy với prefork, không hỗ trợ asyncio tốt
-CMD ["celery", "-A", "src.core.celery:celery", "worker",  "-P gevent", '--loglevel=info', '--concurrency=200']
-# , '--pool=gevent'
-# celery -A src.core.celery:celery worker --loglevel=info --pool=gevent
+# Expose port for FastAPI (optional, for documentation)
+EXPOSE 8000
+
+# No default CMD, docker-compose will override this for each service

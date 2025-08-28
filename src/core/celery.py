@@ -16,8 +16,8 @@ asyncio.set_event_loop_policy(asyncio_gevent.EventLoopPolicy())
 
 celery = Celery(
     'PythonBE',
-    broker= config_server.host_redis_not_docker,
-    backend= f'db+{config_server.db_not_docker}',
+    broker= config_server.host_redis_build,
+    backend= f'db+{config_server.db_build}',
     # include=[config.module_include]
 )
 celery.conf.beat_schedule = schedule
